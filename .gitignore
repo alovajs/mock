@@ -1,0 +1,24 @@
+# dependencies
+/node_modules
+/packages/*/node_modules
+
+# testing
+/packages/*/coverage
+
+# production
+/packages/*/dist
+
+# misc
+.DS_Store
+.idea
+.coveralls.yml
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/packages/*/yarn-error.log*
+
+# Optional eslint cache
+.eslintcache
+/demo
+/design
