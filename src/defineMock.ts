@@ -9,3 +9,11 @@ export default (mock: Mock, enable = true): MockWrapper => ({
 	enable,
 	data: mock
 });
+
+export const throwError = (code: string | number, message: string) => {
+	const err = new Error(message);
+	err.name = code.toString();
+	throw err;
+};
+export const throwError404 = (message: string) => throwError(404, message);
+export const throwError500 = (message: string) => throwError(500, message);
