@@ -1,7 +1,7 @@
 {
 	"name": "@alova/mock",
-	"version": "1.0.5",
-	"description": "a mock request adapter of alova.js",
+	"version": "1.0.6",
+	"description": "mock request adapter of alova.js",
 	"homepage": "https://github.com/alovajs/extensions/packages/mock",
 	"main": "dist/alova-mock.umd.min.js",
 	"jsnext:main": "dist/alova-mock.esm.js",
@@ -9,6 +9,8 @@
 	"types": "typings/index.d.ts",
 	"scripts": {
 		"clean": "rimraf ./dist",
+		"test": "jest",
+		"test:coverage": "jest --coverage",
 		"build:esm": "cross-env NODE_ENV=development rollup -c ./config/rollup.config.esm.js",
 		"build:umd": "cross-env NODE_ENV=development rollup -c ./config/rollup.config.umd.js",
 		"build:umd.min": "cross-env NODE_ENV=production rollup -c ./config/rollup.config.umd.js",
@@ -43,7 +45,7 @@
 		"@types/jest": "^27.5.1",
 		"@typescript-eslint/eslint-plugin": "^1.4.2",
 		"@typescript-eslint/parser": "^1.4.2",
-		"alova": "^1.4.9",
+		"alova": "^1.5.0-alpha.8",
 		"babel-jest": "^29.2.2",
 		"coveralls": "^3.1.1",
 		"cross-env": "5.2.0",
@@ -56,6 +58,7 @@
 		"rollup-plugin-terser": "^7.0.2",
 		"rollup-plugin-typescript2": "^0.31.2",
 		"ts-jest": "^29.0.3",
+		"ts-jest-mock-import-meta": "^1.0.0",
 		"ts-node": "^10.9.1",
 		"tslib": "^2.4.0",
 		"typescript": "^4.7.2"

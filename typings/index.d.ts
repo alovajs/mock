@@ -21,7 +21,7 @@ interface MockRequestInit<R, T, RC, RE, RH> {
 	delay?: number;
 	httpAdapter?: AlovaRequestAdapter<R, T, RC, RE, RH>;
 	mockRequestLogger?: boolean | MockRequestLoggerAdapter; // 是否打印模拟请求信息，便于调试
-	onMockResponse?: (response: MockResponse) => RE;
+	onMockResponse?: (response: Required<MockResponse>) => RE;
 }
 
 interface MockServerRequest {

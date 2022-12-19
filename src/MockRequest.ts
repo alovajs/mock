@@ -119,7 +119,7 @@ export default function MockRequest<RC, RE, RH>(
 								} else if (isNumber(response.status) && isString(response.statusText)) {
 									// 返回了自定义状态码和状态文本，将它作为响应信息
 									status = response.status;
-									status = response.statusText;
+									statusText = response.statusText;
 									body = response.body;
 								} else {
 									// 否则，直接将response作为响应数据

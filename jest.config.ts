@@ -94,7 +94,7 @@ export default {
 	// notifyMode: "failure-change",
 
 	// A preset that is used as a base for Jest's configuration
-	preset: 'ts-jest',
+	// preset: 'ts-jest/presets/js-with-ts',
 
 	// Run tests from one or more projects
 	// projects: undefined,
@@ -158,10 +158,38 @@ export default {
 	// testRunner: "jest-circus/runner",
 
 	// A map from regular expressions to paths to transformers
-	transform: {},
+	transform: {
+		'\\.(j|t)sx?$': [
+			'ts-jest',
+			// mock import.meta, see https://www.npmjs.com/package/ts-jest-mock-import-meta
+			{
+				diagnostics: {
+					ignoreCodes: [1343]
+				},
+				astTransformers: {
+					// 转换import.meta
+					before: [
+						{
+							path: 'node_modules/ts-jest-mock-import-meta',
+							options: {
+								metaObjectReplacement: {
+									url: 'https://xxx',
+									env: {
+										PROD: false,
+										DEV: true
+									},
+									status: 2
+								}
+							}
+						}
+					]
+				}
+			}
+		]
+	},
 
 	// An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
-	transformIgnorePatterns: ['/node_modules/(?!(alova)/)']
+	transformIgnorePatterns: ['/node_modules/(?!(alova|@alova\\/mock)/)']
 
 	// An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them
 	// unmockedModulePathPatterns: undefined,
