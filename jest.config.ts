@@ -26,7 +26,7 @@ export default {
 	coverageDirectory: 'coverage',
 
 	// An array of regexp pattern strings used to skip coverage collection
-	coveragePathIgnorePatterns: ['\\\\node_modules\\\\', '/node_modules/', 'test/mockData.js', 'test/components'],
+	coveragePathIgnorePatterns: ['\\\\node_modules\\\\', '/node_modules/'],
 
 	// Indicates which provider should be used to instrument code for coverage
 	coverageProvider: 'v8',
@@ -189,7 +189,7 @@ export default {
 	},
 
 	// An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
-	transformIgnorePatterns: ['/node_modules/(?!(alova|@alova\\/mock)/)']
+	transformIgnorePatterns: ['/node_modules/(?!alova/)']
 
 	// An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them
 	// unmockedModulePathPatterns: undefined,

@@ -107,30 +107,32 @@ export default function MockRequest<RC, RE, RH>(
 											data
 									  })
 									: mockDataRaw
-							).then(response => {
-								let status = 200,
-									statusText = 'ok',
-									body = undefinedValue;
+							)
+								.then(response => {
+									let status = 200,
+										statusText = 'ok',
+										body = undefinedValue;
 
-								// 如果没有返回值则认为404
-								if (response === undefinedValue) {
-									status = 404;
-									statusText = 'api not found';
-								} else if (isNumber(response.status) && isString(response.statusText)) {
-									// 返回了自定义状态码和状态文本，将它作为响应信息
-									status = response.status;
-									statusText = response.statusText;
-									body = response.body;
-								} else {
-									// 否则，直接将response作为响应数据
-									body = response;
-								}
+									// 如果没有返回值则认为404
+									if (response === undefinedValue) {
+										status = 404;
+										statusText = 'api not found';
+									} else if (isNumber(response.status) && isString(response.statusText)) {
+										// 返回了自定义状态码和状态文本，将它作为响应信息
+										status = response.status;
+										statusText = response.statusText;
+										body = response.body;
+									} else {
+										// 否则，直接将response作为响应数据
+										body = response;
+									}
 
-								// 打印模拟数据请求信息
-								isFn(mockRequestLogger) &&
-									consoleRequestInfo(trueValue, url, adapterConfig.method, adapterConfig.headers, query, data, body);
-								resolve(onMockResponse({ status, statusText, body }));
-							});
+									// 打印模拟数据请求信息
+									isFn(mockRequestLogger) &&
+										consoleRequestInfo(trueValue, url, adapterConfig.method, adapterConfig.headers, query, data, body);
+									resolve(onMockResponse({ status, statusText, body }));
+								})
+								.catch(error => reject(error));
 						} catch (error: any) {
 							reject(error);
 						}

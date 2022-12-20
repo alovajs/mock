@@ -1,6 +1,6 @@
 {
 	"name": "@alova/mock",
-	"version": "1.0.6",
+	"version": "1.0.7",
 	"description": "mock request adapter of alova.js",
 	"homepage": "https://github.com/alovajs/extensions/packages/mock",
 	"main": "dist/alova-mock.umd.min.js",
@@ -61,6 +61,7 @@
 		"ts-jest-mock-import-meta": "^1.0.0",
 		"ts-node": "^10.9.1",
 		"tslib": "^2.4.0",
-		"typescript": "^4.7.2"
+		"typescript": "^4.7.2",
+		"vue": "^3.2.45"
 	}
 }
