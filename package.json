@@ -1,6 +1,6 @@
 {
 	"name": "@alova/mock",
-	"version": "1.0.7",
+	"version": "1.0.8",
 	"description": "mock request adapter of alova.js",
 	"homepage": "https://github.com/alovajs/extensions/packages/mock",
 	"main": "dist/alova-mock.umd.min.js",
@@ -45,7 +45,7 @@
 		"@types/jest": "^27.5.1",
 		"@typescript-eslint/eslint-plugin": "^1.4.2",
 		"@typescript-eslint/parser": "^1.4.2",
-		"alova": "^1.5.0-alpha.8",
+		"alova": "^1.5.0-beta.5",
 		"babel-jest": "^29.2.2",
 		"coveralls": "^3.1.1",
 		"cross-env": "5.2.0",

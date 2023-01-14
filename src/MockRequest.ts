@@ -1,4 +1,4 @@
-import { AlovaRequestAdapterConfig } from 'alova';
+import { Method, RequestElements } from 'alova';
 import { Mock, MockRequestInit, MockResponse } from '../typings';
 import consoleRequestInfo from './consoleRequestInfo';
 import { falseValue, isFn, isNumber, isString, trueValue, undefinedValue } from './helper';
@@ -20,9 +20,9 @@ export default function MockRequest<RC, RE, RH>(
 		onMockResponse = defaultOnMockResponse as (response: MockResponse) => any
 	}: MockRequestInitWithMock<any, any, RC, RE, RH> = { mock: {} }
 ) {
-	return (adapterConfig: AlovaRequestAdapterConfig<any, any, RC, RH>) => {
+	return (elements: RequestElements, method: Method<any, any, any, any, RC, RE, RH>) => {
 		const anchor = document.createElement('a');
-		const { url, data } = adapterConfig;
+		const { url, data, type, headers: requestHeaders } = elements;
 		anchor.href = url;
 
 		// 获取当前请求的模拟数据集合，如果enable为false，则不返回模拟数据
@@ -51,7 +51,7 @@ export default function MockRequest<RC, RE, RH>(
 			});
 
 			// 请求方法不匹配，返回false
-			if (method !== adapterConfig.method.toUpperCase()) {
+			if (method !== type.toUpperCase()) {
 				return falseValue;
 			}
 
@@ -84,9 +84,8 @@ export default function MockRequest<RC, RE, RH>(
 		// 如果没有匹配到模拟数据，则表示要发起请求使用httpAdapter来发送请求
 		if (mockDataRaw === undefinedValue) {
 			if (httpAdapter) {
-				isFn(mockRequestLogger) &&
-					consoleRequestInfo(falseValue, url, adapterConfig.method, adapterConfig.headers, query);
-				return httpAdapter(adapterConfig);
+				isFn(mockRequestLogger) && consoleRequestInfo(falseValue, url, type, requestHeaders, query);
+				return httpAdapter(elements, method);
 			} else {
 				throw new Error(`could not find the httpAdapter which send request.\n[url]${url}`);
 			}
@@ -129,7 +128,7 @@ export default function MockRequest<RC, RE, RH>(
 
 									// 打印模拟数据请求信息
 									isFn(mockRequestLogger) &&
-										consoleRequestInfo(trueValue, url, adapterConfig.method, adapterConfig.headers, query, data, body);
+										consoleRequestInfo(trueValue, url, type, requestHeaders, query, data, body);
 									resolve(onMockResponse({ status, statusText, body }));
 								})
 								.catch(error => reject(error));
