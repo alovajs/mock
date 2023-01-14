@@ -10,7 +10,7 @@ const labelStyle = (bgColor: string, borderColor = '') => {
 	}
 	return style;
 };
-const titleStyle = () => `color: black; font-size: 12px; font-weight: bolder`;
+const titleStyle = () => 'color: black; font-size: 12px; font-weight: bolder';
 const transform2TableData = (obj: AnyObject) => {
 	const tableData = {} as AnyObject;
 	for (const key in obj) {
