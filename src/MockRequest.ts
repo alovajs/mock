@@ -1,7 +1,7 @@
 import { Method, RequestElements } from 'alova';
 import { Mock, MockRequestInit, MockResponse } from '../typings';
 import consoleRequestInfo from './consoleRequestInfo';
-import { falseValue, isFn, isNumber, isString, trueValue, undefinedValue } from './helper';
+import { falseValue, isFn, isNumber, isString, parseUrl, trueValue, undefinedValue } from './helper';
 
 const defaultOnMockResponse = ({ status = 200, statusText = 'ok', body }: MockResponse) =>
 	new Response(JSON.stringify(body), {
@@ -21,22 +21,13 @@ export default function MockRequest<RC, RE, RH>(
 	}: MockRequestInitWithMock<any, any, RC, RE, RH> = { mock: {} }
 ) {
 	return (elements: RequestElements, method: Method<any, any, any, any, RC, RE, RH>) => {
-		const anchor = document.createElement('a');
-		const { url, data, type, headers: requestHeaders } = elements;
-		anchor.href = url;
-
 		// 获取当前请求的模拟数据集合，如果enable为false，则不返回模拟数据
 		mock = (enable && mock) || {};
 
-		// 用正则表达式解析search参数为对象
-		const searchParams = new URLSearchParams(anchor.search);
-		const query: Record<string, string> = {};
-		for (const [key, value] of searchParams) {
-			query[key] = value;
-		}
-
+		const { url, data, type, headers: requestHeaders } = elements;
+		const { pathname, query } = parseUrl(url);
 		const params: Record<string, string> = {};
-		const pathnameSplited = anchor.pathname.split('/');
+		const pathnameSplited = pathname.split('/');
 		const foundMockDataKeys = Object.keys(mock).filter(key => {
 			// 如果key的前面是-，表示忽略此模拟数据，此时也返回false
 			if (key.startsWith('-')) {
@@ -84,7 +75,7 @@ export default function MockRequest<RC, RE, RH>(
 		// 如果没有匹配到模拟数据，则表示要发起请求使用httpAdapter来发送请求
 		if (mockDataRaw === undefinedValue) {
 			if (httpAdapter) {
-				isFn(mockRequestLogger) && consoleRequestInfo(falseValue, url, type, requestHeaders, query);
+				isFn(mockRequestLogger) && mockRequestLogger(falseValue, url, type, requestHeaders, query);
 				return httpAdapter(elements, method);
 			} else {
 				throw new Error(`could not find the httpAdapter which send request.\n[url]${url}`);
@@ -127,8 +118,7 @@ export default function MockRequest<RC, RE, RH>(
 									}
 
 									// 打印模拟数据请求信息
-									isFn(mockRequestLogger) &&
-										consoleRequestInfo(trueValue, url, type, requestHeaders, query, data, body);
+									isFn(mockRequestLogger) && mockRequestLogger(trueValue, url, type, requestHeaders, query, data, body);
 									resolve(onMockResponse({ status, statusText, body }));
 								})
 								.catch(error => reject(error));

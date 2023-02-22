@@ -140,7 +140,10 @@ export default {
 	// The test environment that will be used for testing
 	testEnvironment: 'jsdom',
 
-	testMatch: ['**/?(*.)+(spec|test).[tj]s?(x)'],
+	testMatch: [
+		'**/?(*.)+(spec|test).[tj]s?(x)'
+		// '**/test/parseUrl.spec.ts(x)?'
+	],
 
 	// An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
 	testPathIgnorePatterns: [
