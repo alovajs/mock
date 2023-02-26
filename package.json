@@ -1,8 +1,8 @@
 {
 	"name": "@alova/mock",
 	"version": "1.0.9",
-	"description": "mock request adapter of alova.js",
-	"homepage": "https://github.com/alovajs/extensions/packages/mock",
+	"description": "mock request adapter for alova.js",
+	"homepage": "https://github.com/alovajs/mock",
 	"main": "dist/alova-mock.umd.min.js",
 	"jsnext:main": "dist/alova-mock.esm.js",
 	"module": "dist/alova-mock.esm.js",
@@ -25,10 +25,10 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git://github.com/alovajs/extensions.git"
+		"url": "git://github.com/alovajs/mock.git"
 	},
 	"bugs": {
-		"url": "https://github.com/alovajs/extensions/issues"
+		"url": "https://github.com/alovajs/mock/issues"
 	},
 	"files": [
 		"dist",
