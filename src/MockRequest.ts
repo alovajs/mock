@@ -83,50 +83,53 @@ export default function MockRequest<RC, RE, RH>(
 		}
 
 		let timer: NodeJS.Timeout;
+		const resonpsePromise = new Promise<RE>((resolve, reject) => {
+			timer = setTimeout(() => {
+				try {
+					// response支持返回promise对象
+					Promise.resolve(
+						isFn(mockDataRaw)
+							? mockDataRaw({
+									query,
+									params,
+									data
+							  })
+							: mockDataRaw
+					)
+						.then(response => {
+							let status = 200,
+								statusText = 'ok',
+								body = undefinedValue;
+
+							// 如果没有返回值则认为404
+							if (response === undefinedValue) {
+								status = 404;
+								statusText = 'api not found';
+							} else if (isNumber(response.status) && isString(response.statusText)) {
+								// 返回了自定义状态码和状态文本，将它作为响应信息
+								status = response.status;
+								statusText = response.statusText;
+								body = response.body;
+							} else {
+								// 否则，直接将response作为响应数据
+								body = response;
+							}
+
+							// 打印模拟数据请求信息
+							isFn(mockRequestLogger) && mockRequestLogger(trueValue, url, type, requestHeaders, query, data, body);
+							resolve(onMockResponse({ status, statusText, body }));
+						})
+						.catch(error => reject(error));
+				} catch (error: any) {
+					reject(error);
+				}
+			}, delay);
+		});
 		return {
 			response: () =>
-				new Promise<RE>((resolve, reject) => {
-					timer = setTimeout(() => {
-						try {
-							// response支持返回promise对象
-							Promise.resolve(
-								isFn(mockDataRaw)
-									? mockDataRaw({
-											query,
-											params,
-											data
-									  })
-									: mockDataRaw
-							)
-								.then(response => {
-									let status = 200,
-										statusText = 'ok',
-										body = undefinedValue;
-
-									// 如果没有返回值则认为404
-									if (response === undefinedValue) {
-										status = 404;
-										statusText = 'api not found';
-									} else if (isNumber(response.status) && isString(response.statusText)) {
-										// 返回了自定义状态码和状态文本，将它作为响应信息
-										status = response.status;
-										statusText = response.statusText;
-										body = response.body;
-									} else {
-										// 否则，直接将response作为响应数据
-										body = response;
-									}
-
-									// 打印模拟数据请求信息
-									isFn(mockRequestLogger) && mockRequestLogger(trueValue, url, type, requestHeaders, query, data, body);
-									resolve(onMockResponse({ status, statusText, body }));
-								})
-								.catch(error => reject(error));
-						} catch (error: any) {
-							reject(error);
-						}
-					}, delay);
-				}),
+				resonpsePromise.then(response =>
+					(response as Object).toString() === '[object Response]' ? (response as any).clone() : response
+				),
 			headers: () => Promise.resolve<Headers>(new Headers()),
 			abort: () => {
 				clearTimeout(timer);

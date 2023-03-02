@@ -1,23 +1,14 @@
-# alova模拟数据适配器
+# alova 模拟数据适配器
 
-[alova](https://github.com/alovajs/alova) 是一个请求场景管理库，它的使命，就是让应用更聪明地管理 CS 数据交互，针对不同的请求场景提出更好的请求管理方案，因此也提供了一些特定场景下的请求方案，可以让开发者更优雅地实现更高性能和体验更好的功能。
+**alova 的模拟数据请求适配器**
+
+[alova](https://github.com/alovajs/alova) 是一个轻量级的请求策略库，它针对不同请求场景分别提供了具有针对性的请求策略，来提升应用可用性、流畅性，降低服务端压力，让应用如智者一般具备卓越的策略思维。
+
+[官网](https://alova.js.org/extension/alova-mock) | [核心库 alova](https://github.com/alovajs/alova)
 
 ## alova 示例
 
-[这里有些示例将会展示 alova 的强大力量](https://alova.js.org/category/%E7%A4%BA%E4%BE%8B)
-
-## Packages
-
-本仓库包含以下 packages
-
-| Project                                                                        | Description                        |
-| ------------------------------------------------------------------------------ | ---------------------------------- |
-| [@alova/mock](https://github.com/alovajs/extensions/tree/main/packages/mock)   | a mock request adapter of alova.js |
-| [@alova/hooks](https://github.com/alovajs/extensions/tree/main/packages/hooks) | extended hooks with alova.js       |
-
-## 下一步做什么？
-
-就像上面所说，alova 的使命是针对不同的请求场景提出更好的请求管理方案，特定场景的方案将会在 **@alova/hooks** 中实现，如果你有期待的请求场景，欢迎通过 [issue](https://github.com/alovajs/extensions/issues) 来讨论，也欢迎贡献你的聪明才智，通过 [pull requests](https://github.com/alovajs/extensions/pulls) 来一起让 alova 变得更好。
+[这里有些示例将会展示 alova 的强大力量](https://alova.js.org/category/examples)
 
 ## LICENSE
 
