@@ -38,7 +38,10 @@ describe('mock request', () => {
 					err.name = status.toString();
 					throw err;
 				}
-				return body;
+				return {
+					response: body,
+					headers: {}
+				};
 			},
 			mockRequestLogger: false
 		});
@@ -80,7 +83,12 @@ describe('mock request', () => {
 		// 模拟数据请求适配器
 		const mockRequestAdapter = createAlovaMockAdapter([mocks], {
 			delay: 10,
-			onMockResponse: responseData => responseData.body,
+			onMockResponse: responseData => {
+				return {
+					response: responseData.body,
+					headers: {}
+				};
+			},
 			mockRequestLogger: ({ isMock, url, method, headers, query, data, response }) => {
 				mockFn();
 				expect(isMock).toBeTruthy();
@@ -156,6 +164,45 @@ describe('mock request', () => {
 			mockFn();
 			expect(err.name).toBe('403');
 			expect(err.message).toBe('customer error');
+		}
+		expect(mockFn).toBeCalledTimes(1);
+	});
+
+	test('should receive error when throw it in mock function', async () => {
+		const mocks = defineMock({
+			'[POST]/detail': () => {
+				throw new Error('network error');
+			}
+		});
+
+		// 模拟数据请求适配器
+		const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+			delay: 10,
+			onMockResponse: ({ status, statusText, body }) => {
+				if (status >= 300) {
+					const err = new Error(statusText);
+					err.name = status.toString();
+					throw err;
+				}
+				return {
+					response: body,
+					headers: {}
+				};
+			}
+		});
+
+		const alovaInst = createAlova({
+			baseURL: 'http://xxx',
+			statesHook: VueHook,
+			requestAdapter: mockRequestAdapter
+		});
+
+		const mockFn = jest.fn();
+		try {
+			await alovaInst.Post('/detail').send();
+		} catch (err: any) {
+			mockFn();
+			expect(err.message).toBe('network error');
 		}
 		expect(mockFn).toBeCalledTimes(1);
 	});

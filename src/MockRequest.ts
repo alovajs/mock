@@ -3,11 +3,13 @@ import { Mock, MockRequestInit, MockResponse } from '../typings';
 import consoleRequestInfo from './consoleRequestInfo';
 import { falseValue, isFn, isNumber, isString, parseUrl, trueValue, undefinedValue } from './helper';
 
-const defaultOnMockResponse = ({ status = 200, statusText = 'ok', body }: MockResponse) =>
-	new Response(JSON.stringify(body), {
+const defaultOnMockResponse: MockResponse = ({ status = 200, statusText = 'ok', body }) => ({
+	response: new Response(JSON.stringify(body), {
 		status,
 		statusText
-	});
+	}),
+	headers: new Headers({})
+});
 type MockRequestInitWithMock<R, T, RC, RE, RH> = MockRequestInit<R, T, RC, RE, RH> & { mock: Mock };
 export default function MockRequest<RC, RE, RH>(
 	{
@@ -17,7 +19,7 @@ export default function MockRequest<RC, RE, RH>(
 		httpAdapter,
 		mockRequestLogger = consoleRequestInfo,
 		mock,
-		onMockResponse = defaultOnMockResponse as (response: MockResponse) => any
+		onMockResponse = defaultOnMockResponse
 	}: MockRequestInitWithMock<any, any, RC, RE, RH> = { mock: {} }
 ) {
 	return (elements: RequestElements, method: Method<any, any, any, any, RC, RE, RH>) => {
@@ -92,7 +94,7 @@ export default function MockRequest<RC, RE, RH>(
 		}
 
 		let timer: NodeJS.Timeout;
-		const resonpsePromise = new Promise<RE>((resolve, reject) => {
+		const resonpsePromise = new Promise<ReturnType<MockResponse>>((resolve, reject) => {
 			timer = setTimeout(() => {
 				try {
 					// response支持返回promise对象
@@ -145,7 +147,8 @@ export default function MockRequest<RC, RE, RH>(
 										query,
 										params,
 										data: data || {}
-									}
+									},
+									method
 								)
 							);
 						})
@@ -157,10 +160,10 @@ export default function MockRequest<RC, RE, RH>(
 		});
 		return {
 			response: () =>
-				resonpsePromise.then(response =>
+				resonpsePromise.then(({ response }) =>
 					(response as Object).toString() === '[object Response]' ? (response as any).clone() : response
 				),
-			headers: () => Promise.resolve<Headers>(new Headers()),
+			headers: () => resonpsePromise.then(({ headers }) => headers),
 			abort: () => {
 				clearTimeout(timer);
 			}

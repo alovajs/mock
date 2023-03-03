@@ -143,6 +143,7 @@ export default {
 	testMatch: [
 		'**/?(*.)+(spec|test).[tj]s?(x)'
 		// '**/test/parseUrl.spec.ts(x)?'
+		// '**/test/mockRequest.spec.ts(x)?'
 	],
 
 	// An array of regexp pattern strings that are matched against all test paths, matched tests are skipped

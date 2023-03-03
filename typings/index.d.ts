@@ -1,4 +1,4 @@
-import { AlovaRequestAdapter } from 'alova';
+import { AlovaRequestAdapter, Method } from 'alova';
 
 interface MockServerRequest {
 	headers: Record<string, any>;
@@ -16,17 +16,29 @@ interface LoggerMockRequestResponse extends MockServerRequest {
 interface MockRequestLoggerAdapter {
 	(loggerData: LoggerMockRequestResponse): void;
 }
-interface MockResponse {
-	status?: number;
-	statusText?: string;
-	body?: any;
+/**
+ * 模拟响应函数
+ */
+interface MockResponse<RC = any, RE = any, RH = any> {
+	(
+		response: {
+			status: number;
+			statusText: string;
+			body: any;
+		},
+		request: MockServerRequest,
+		currentMethod: Method<any, any, any, any, RC, RE, RH>
+	): {
+		response: RE;
+		headers: RH;
+	};
 }
 interface MockRequestInit<R, T, RC, RE, RH> {
 	enable?: boolean;
 	delay?: number;
 	httpAdapter?: AlovaRequestAdapter<R, T, RC, RE, RH>;
 	mockRequestLogger?: boolean | MockRequestLoggerAdapter; // 是否打印模拟请求信息，便于调试
-	onMockResponse?: (response: Required<MockResponse>, request: MockServerRequest) => any;
+	onMockResponse?: MockResponse;
 }
 
 type MockFunction = (request: MockServerRequest) => any;
