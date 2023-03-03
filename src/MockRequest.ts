@@ -75,7 +75,16 @@ export default function MockRequest<RC, RE, RH>(
 		// 如果没有匹配到模拟数据，则表示要发起请求使用httpAdapter来发送请求
 		if (mockDataRaw === undefinedValue) {
 			if (httpAdapter) {
-				isFn(mockRequestLogger) && mockRequestLogger(falseValue, url, type, requestHeaders, query);
+				isFn(mockRequestLogger) &&
+					mockRequestLogger({
+						isMock: falseValue,
+						url,
+						method: type,
+						params,
+						headers: requestHeaders,
+						query,
+						data: {}
+					});
 				return httpAdapter(elements, method);
 			} else {
 				throw new Error(`could not find the httpAdapter which send request.\n[url]${url}`);
@@ -92,7 +101,8 @@ export default function MockRequest<RC, RE, RH>(
 							? mockDataRaw({
 									query,
 									params,
-									data
+									data,
+									headers: requestHeaders
 							  })
 							: mockDataRaw
 					)
@@ -116,8 +126,28 @@ export default function MockRequest<RC, RE, RH>(
 							}
 
 							// 打印模拟数据请求信息
-							isFn(mockRequestLogger) && mockRequestLogger(trueValue, url, type, requestHeaders, query, data, body);
-							resolve(onMockResponse({ status, statusText, body }));
+							isFn(mockRequestLogger) &&
+								mockRequestLogger({
+									isMock: trueValue,
+									url,
+									method: type,
+									params,
+									headers: requestHeaders,
+									query,
+									data: data || {},
+									response: body
+								});
+							resolve(
+								onMockResponse(
+									{ status, statusText, body },
+									{
+										headers: requestHeaders,
+										query,
+										params,
+										data: data || {}
+									}
+								)
+							);
 						})
 						.catch(error => reject(error));
 				} catch (error: any) {

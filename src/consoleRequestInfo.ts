@@ -1,3 +1,5 @@
+import { MockRequestLoggerAdapter } from '../typings';
+
 // 预定义的样式和固定文本
 const mockLabel = 'Mock';
 const mockLabelColor = '#64E8D6';
@@ -21,15 +23,7 @@ const transform2TableData = (obj: AnyObject) => {
 
 type AnyObject = Record<string, any>;
 // 打印请求信息，模拟数据请求专用
-export default function (
-	isMock: boolean,
-	url: string,
-	method: string,
-	requestHeaders: AnyObject,
-	queryStringParams: AnyObject,
-	requestBody?: any,
-	response?: any
-) {
+const consoleRequestInfo: MockRequestLoggerAdapter = ({ isMock, url, method, headers, query, data, response }) => {
 	console.groupCollapsed(
 		`%c${isMock ? mockLabel : realRequestLabel}`,
 		labelStyle(isMock ? mockLabelColor : realRequestLabelColor),
@@ -41,18 +35,20 @@ export default function (
 
 	// 输出Request Headers
 	console.log('%c[Request Headers]', titleStyle());
-	console.table(transform2TableData(requestHeaders));
+	console.table(transform2TableData(headers));
 
 	// 输出Query String Parameters
 	console.log('%c[Query String Parameters]', titleStyle());
-	console.table(transform2TableData(queryStringParams));
+	console.table(transform2TableData(query));
 
 	// 输出request body
-	console.log('%c[Request Body]', titleStyle(), requestBody || '');
+	console.log('%c[Request Body]', titleStyle(), data || '');
 
 	// 输出response body
 	if (isMock) {
 		console.log('%c[Response Body]', titleStyle(), response || '');
 	}
 	console.groupEnd();
-}
+};
+
+export default consoleRequestInfo;
