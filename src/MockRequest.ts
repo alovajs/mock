@@ -147,7 +147,7 @@ export default function MockRequest<RC, RE, RH>(
 						)
 					);
 				} catch (error: any) {
-					reject(onMockError(error));
+					reject(onMockError(error, method));
 				}
 			}, delay);
 		});

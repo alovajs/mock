@@ -39,7 +39,7 @@ interface MockResponse<RC = any, RE = any, RH = any> {
 	};
 }
 interface MockError {
-	(error: Error): any;
+	(error: Error, currentMethod: Method): any;
 }
 interface MockRequestInit<R, T, RC, RE, RH> {
 	enable?: boolean;
