@@ -89,7 +89,7 @@ describe('mock request', () => {
 					headers: {}
 				};
 			},
-			mockRequestLogger: ({ isMock, url, method, headers, query, data, response }) => {
+			mockRequestLogger: ({ isMock, url, method, headers, query, data, responseHeaders, response }) => {
 				mockFn();
 				expect(isMock).toBeTruthy();
 				expect(url).toBe('http://xxx/detail?aa=1&bb=2');
@@ -102,6 +102,7 @@ describe('mock request', () => {
 					bb: '2'
 				});
 				expect(data).toStrictEqual({});
+				expect(responseHeaders).toStrictEqual({});
 				expect(response).toStrictEqual({
 					id: 1
 				});
@@ -133,7 +134,10 @@ describe('mock request', () => {
 			'[POST]/detail': () => {
 				return {
 					status: 403,
-					statusText: 'customer error'
+					statusText: 'customer error',
+					responseHeaders: {
+						rh1: 'rh1'
+					}
 				};
 			}
 		});
@@ -141,7 +145,8 @@ describe('mock request', () => {
 		// 模拟数据请求适配器
 		const mockRequestAdapter = createAlovaMockAdapter([mocks], {
 			delay: 10,
-			onMockResponse: ({ status, statusText, body }) => {
+			onMockResponse: ({ status, statusText, responseHeaders, body }) => {
+				expect(responseHeaders).toStrictEqual({ rh1: 'rh1' });
 				if (status >= 300) {
 					const err = new Error(statusText);
 					err.name = status.toString();
@@ -188,7 +193,8 @@ describe('mock request', () => {
 					response: body,
 					headers: {}
 				};
-			}
+			},
+			onMockError: error => new Error('new error:' + error.message)
 		});
 
 		const alovaInst = createAlova({
@@ -202,7 +208,7 @@ describe('mock request', () => {
 			await alovaInst.Post('/detail').send();
 		} catch (err: any) {
 			mockFn();
-			expect(err.message).toBe('network error');
+			expect(err.message).toBe('new error:network error');
 		}
 		expect(mockFn).toBeCalledTimes(1);
 	});

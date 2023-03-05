@@ -7,10 +7,14 @@ interface MockServerRequest {
 	data: Record<string, any>;
 }
 
+interface ResponseHeaders {
+	[x: string]: any;
+}
 interface LoggerMockRequestResponse extends MockServerRequest {
 	isMock: boolean;
 	url: string;
 	method: string;
+	responseHeaders: ResponseHeaders;
 	response?: any;
 }
 interface MockRequestLoggerAdapter {
@@ -24,6 +28,7 @@ interface MockResponse<RC = any, RE = any, RH = any> {
 		response: {
 			status: number;
 			statusText: string;
+			responseHeaders: ResponseHeaders;
 			body: any;
 		},
 		request: MockServerRequest,
@@ -33,15 +38,25 @@ interface MockResponse<RC = any, RE = any, RH = any> {
 		headers: RH;
 	};
 }
+interface MockError {
+	(error: Error): any;
+}
 interface MockRequestInit<R, T, RC, RE, RH> {
 	enable?: boolean;
 	delay?: number;
 	httpAdapter?: AlovaRequestAdapter<R, T, RC, RE, RH>;
 	mockRequestLogger?: boolean | MockRequestLoggerAdapter; // 是否打印模拟请求信息，便于调试
-	onMockResponse?: MockResponse;
+	onMockResponse?: MockResponse<RC, RE, RH>;
+	onMockError?: MockError;
 }
 
-type MockFunction = (request: MockServerRequest) => any;
+interface StatusResponse {
+	status: number;
+	statusText: string;
+	responseHeaders?: ResponseHeaders;
+	body?: any;
+}
+type MockFunction = (request: MockServerRequest) => StatusResponse | any;
 type Mock = Record<string, MockFunction | string | number | Record<string, any> | any[]>;
 
 interface MockWrapper {

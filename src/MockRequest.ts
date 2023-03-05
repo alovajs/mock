@@ -1,15 +1,9 @@
 import { Method, RequestElements } from 'alova';
 import { Mock, MockRequestInit, MockResponse } from '../typings';
 import consoleRequestInfo from './consoleRequestInfo';
+import { defaultMockError, defaultMockResponse } from './defaults';
 import { falseValue, isFn, isNumber, isString, parseUrl, trueValue, undefinedValue } from './helper';
 
-const defaultOnMockResponse: MockResponse = ({ status = 200, statusText = 'ok', body }) => ({
-	response: new Response(JSON.stringify(body), {
-		status,
-		statusText
-	}),
-	headers: new Headers({})
-});
 type MockRequestInitWithMock<R, T, RC, RE, RH> = MockRequestInit<R, T, RC, RE, RH> & { mock: Mock };
 export default function MockRequest<RC, RE, RH>(
 	{
@@ -19,7 +13,8 @@ export default function MockRequest<RC, RE, RH>(
 		httpAdapter,
 		mockRequestLogger = consoleRequestInfo,
 		mock,
-		onMockResponse = defaultOnMockResponse
+		onMockResponse = defaultMockResponse,
+		onMockError = defaultMockError
 	}: MockRequestInitWithMock<any, any, RC, RE, RH> = { mock: {} }
 ) {
 	return (elements: RequestElements, method: Method<any, any, any, any, RC, RE, RH>) => {
@@ -98,66 +93,66 @@ export default function MockRequest<RC, RE, RH>(
 			timer = setTimeout(() => {
 				try {
 					// response支持返回promise对象
-					Promise.resolve(
-						isFn(mockDataRaw)
-							? mockDataRaw({
-									query,
-									params,
-									data,
-									headers: requestHeaders
-							  })
-							: mockDataRaw
-					)
-						.then(response => {
-							let status = 200,
-								statusText = 'ok',
-								body = undefinedValue;
+					const response = isFn(mockDataRaw)
+						? mockDataRaw({
+								query,
+								params,
+								data,
+								headers: requestHeaders
+						  })
+						: mockDataRaw;
+					let status = 200,
+						statusText = 'ok',
+						responseHeaders = {},
+						body = undefinedValue;
 
-							// 如果没有返回值则认为404
-							if (response === undefinedValue) {
-								status = 404;
-								statusText = 'api not found';
-							} else if (isNumber(response.status) && isString(response.statusText)) {
-								// 返回了自定义状态码和状态文本，将它作为响应信息
-								status = response.status;
-								statusText = response.statusText;
-								body = response.body;
-							} else {
-								// 否则，直接将response作为响应数据
-								body = response;
-							}
+					// 如果没有返回值则认为404
+					if (response === undefinedValue) {
+						status = 404;
+						statusText = 'api not found';
+					} else if (isNumber(response.status) && isString(response.statusText)) {
+						// 返回了自定义状态码和状态文本，将它作为响应信息
+						status = response.status;
+						statusText = response.statusText;
+						responseHeaders = response.responseHeaders || responseHeaders;
+						body = response.body;
+					} else {
+						// 否则，直接将response作为响应数据
+						body = response;
+					}
 
-							// 打印模拟数据请求信息
-							isFn(mockRequestLogger) &&
-								mockRequestLogger({
-									isMock: trueValue,
-									url,
-									method: type,
-									params,
-									headers: requestHeaders,
-									query,
-									data: data || {},
-									response: body
-								});
-							resolve(
-								onMockResponse(
-									{ status, statusText, body },
-									{
-										headers: requestHeaders,
-										query,
-										params,
-										data: data || {}
-									},
-									method
-								)
-							);
-						})
-						.catch(error => reject(error));
+					// 打印模拟数据请求信息
+					isFn(mockRequestLogger) &&
+						mockRequestLogger({
+							isMock: trueValue,
+							url,
+							method: type,
+							params,
+							headers: requestHeaders,
+							query,
+							data: data || {},
+							responseHeaders,
+							response: body
+						});
+					resolve(
+						onMockResponse(
+							{ status, statusText, responseHeaders, body },
+							{
+								headers: requestHeaders,
+								query,
+								params,
+								data: data || {}
+							},
+							method
+						)
+					);
 				} catch (error: any) {
-					reject(error);
+					reject(onMockError(error));
 				}
 			}, delay);
 		});
+
+		// 返回响应数据
 		return {
 			response: () =>
 				resonpsePromise.then(({ response }) =>

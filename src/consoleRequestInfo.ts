@@ -23,7 +23,16 @@ const transform2TableData = (obj: AnyObject) => {
 
 type AnyObject = Record<string, any>;
 // 打印请求信息，模拟数据请求专用
-const consoleRequestInfo: MockRequestLoggerAdapter = ({ isMock, url, method, headers, query, data, response }) => {
+const consoleRequestInfo: MockRequestLoggerAdapter = ({
+	isMock,
+	url,
+	method,
+	headers,
+	query,
+	data,
+	responseHeaders,
+	response
+}) => {
 	console.groupCollapsed(
 		`%c${isMock ? mockLabel : realRequestLabel}`,
 		labelStyle(isMock ? mockLabelColor : realRequestLabelColor),
@@ -46,6 +55,11 @@ const consoleRequestInfo: MockRequestLoggerAdapter = ({ isMock, url, method, hea
 
 	// 输出response body
 	if (isMock) {
+		// 响应头有数据时，输出Response Headers
+		if (Object.keys(responseHeaders).length > 0) {
+			console.log('%c[Response Headers]', titleStyle());
+			console.table(transform2TableData(responseHeaders));
+		}
 		console.log('%c[Response Body]', titleStyle(), response || '');
 	}
 	console.groupEnd();
