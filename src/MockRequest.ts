@@ -1,8 +1,8 @@
 import { Method, RequestElements } from 'alova';
-import { Mock, MockRequestInit, MockResponse } from '../typings';
+import { Mock, MockRequestInit } from '../typings';
 import consoleRequestInfo from './consoleRequestInfo';
 import { defaultMockError, defaultMockResponse } from './defaults';
-import { falseValue, isFn, isNumber, isString, parseUrl, trueValue, undefinedValue } from './helper';
+import { falseValue, isFn, isNumber, isString, noop, parseUrl, trueValue, undefinedValue } from './helper';
 
 type MockRequestInitWithMock<R, T, RC, RE, RH> = MockRequestInit<R, T, RC, RE, RH> & { mock: Mock };
 export default function MockRequest<RC, RE, RH>(
@@ -80,7 +80,8 @@ export default function MockRequest<RC, RE, RH>(
 						params,
 						headers: requestHeaders,
 						query,
-						data: {}
+						data: {},
+						responseHeaders: {}
 					});
 				return httpAdapter(elements, method);
 			} else {
@@ -89,11 +90,13 @@ export default function MockRequest<RC, RE, RH>(
 		}
 
 		let timer: NodeJS.Timeout;
-		const resonpsePromise = new Promise<ReturnType<MockResponse>>((resolve, reject) => {
+		let rejectFn: (reason?: any) => void = noop;
+		const resonpsePromise = new Promise<any>((resolve, reject) => {
+			rejectFn = reject;
 			timer = setTimeout(() => {
+				// response支持返回promise对象
 				try {
-					// response支持返回promise对象
-					const response = isFn(mockDataRaw)
+					const res = isFn(mockDataRaw)
 						? mockDataRaw({
 								query,
 								params,
@@ -101,66 +104,69 @@ export default function MockRequest<RC, RE, RH>(
 								headers: requestHeaders
 						  })
 						: mockDataRaw;
-					let status = 200,
-						statusText = 'ok',
-						responseHeaders = {},
-						body = undefinedValue;
-
-					// 如果没有返回值则认为404
-					if (response === undefinedValue) {
-						status = 404;
-						statusText = 'api not found';
-					} else if (isNumber(response.status) && isString(response.statusText)) {
-						// 返回了自定义状态码和状态文本，将它作为响应信息
-						status = response.status;
-						statusText = response.statusText;
-						responseHeaders = response.responseHeaders || responseHeaders;
-						body = response.body;
-					} else {
-						// 否则，直接将response作为响应数据
-						body = response;
-					}
-
-					// 打印模拟数据请求信息
-					isFn(mockRequestLogger) &&
-						mockRequestLogger({
-							isMock: trueValue,
-							url,
-							method: type,
-							params,
-							headers: requestHeaders,
-							query,
-							data: data || {},
-							responseHeaders,
-							response: body
-						});
-					resolve(
-						onMockResponse(
-							{ status, statusText, responseHeaders, body },
-							{
-								headers: requestHeaders,
-								query,
-								params,
-								data: data || {}
-							},
-							method
-						)
-					);
-				} catch (error: any) {
-					reject(onMockError(error, method));
+					resolve(res);
+				} catch (error) {
+					reject(error);
 				}
 			}, delay);
-		});
+		})
+			.then(response => {
+				let status = 200,
+					statusText = 'ok',
+					responseHeaders = {},
+					body = undefinedValue;
+
+				// 如果没有返回值则认为404
+				if (response === undefinedValue) {
+					status = 404;
+					statusText = 'api not found';
+				} else if (isNumber(response.status) && isString(response.statusText)) {
+					// 返回了自定义状态码和状态文本，将它作为响应信息
+					status = response.status;
+					statusText = response.statusText;
+					responseHeaders = response.responseHeaders || responseHeaders;
+					body = response.body;
+				} else {
+					// 否则，直接将response作为响应数据
+					body = response;
+				}
+
+				// 打印模拟数据请求信息
+				isFn(mockRequestLogger) &&
+					mockRequestLogger({
+						isMock: trueValue,
+						url,
+						method: type,
+						params,
+						headers: requestHeaders,
+						query,
+						data: data || {},
+						responseHeaders,
+						response: body
+					});
+				return onMockResponse(
+					{ status, statusText, responseHeaders, body },
+					{
+						headers: requestHeaders,
+						query,
+						params,
+						data: data || {}
+					},
+					method
+				);
+			})
+			.catch(error => Promise.reject(onMockError(error, method)));
 
 		// 返回响应数据
 		return {
 			response: () =>
 				resonpsePromise.then(({ response }) =>
-					(response as Object).toString() === '[object Response]' ? (response as any).clone() : response
+					(response as any).toString() === '[object Response]' ? (response as any).clone() : response
 				),
 			headers: () => resonpsePromise.then(({ headers }) => headers),
 			abort: () => {
 				clearTimeout(timer);
+				rejectFn('The user abort request');
 			}
 		};
 	};

@@ -47,12 +47,12 @@ export const len = (data: any[] | Uint8Array | string) => data.length;
 export const parseUrl = (url: string) => {
 	url = /^[^/]*\/\//.test(url) ? url : '//' + url;
 	const splitedFullPath = url.split('/').slice(3);
+	const query = {} as Record<string, string>;
 	let pathContainedParams = splitedFullPath.pop(),
 		pathname = '',
-		query = {} as Record<string, string>,
 		hash = '';
 	if (pathContainedParams) {
-		pathContainedParams = pathContainedParams.replace(/\?[^\?\#]+/, mat => {
+		pathContainedParams = pathContainedParams.replace(/\?[^?#]+/, mat => {
 			// 解析url参数
 			mat
 				.substring(1)

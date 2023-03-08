@@ -203,13 +203,70 @@ describe('mock request', () => {
 			requestAdapter: mockRequestAdapter
 		});
 
-		const mockFn = jest.fn();
-		try {
-			await alovaInst.Post('/detail').send();
-		} catch (err: any) {
-			mockFn();
-			expect(err.message).toBe('new error:network error');
-		}
-		expect(mockFn).toBeCalledTimes(1);
+		await expect(() => alovaInst.Post('/detail').send()).rejects.toThrow('new error:network error');
+	});
+
+	test('should work when mock function is async', async () => {
+		const mocks = defineMock({
+			'[POST]/detail': async () => {
+				return {
+					id: 1
+				};
+			}
+		});
+
+		// 模拟数据请求适配器
+		const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+			delay: 10,
+			onMockResponse: ({ body }) => {
+				return {
+					response: body,
+					headers: {}
+				};
+			},
+			mockRequestLogger: false
+		});
+
+		const alovaInst = createAlova({
+			baseURL: 'http://xxx',
+			statesHook: VueHook,
+			requestAdapter: mockRequestAdapter
+		});
+
+		const res = await alovaInst.Post('/detail').send();
+		expect(res).toStrictEqual({ id: 1 });
+	});
+
+	test('should receive error when throw it in async mock function', async () => {
+		const mocks = defineMock({
+			'[POST]/detail': async () => {
+				throw new Error('network error');
+			}
+		});
+
+		// 模拟数据请求适配器
+		const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+			delay: 10,
+			onMockResponse: ({ status, statusText, body }) => {
+				if (status >= 300) {
+					const err = new Error(statusText);
+					err.name = status.toString();
+					throw err;
+				}
+				return {
+					response: body,
+					headers: {}
+				};
+			},
+			onMockError: error => new Error('new error:' + error.message)
+		});
+
+		const alovaInst = createAlova({
+			baseURL: 'http://xxx',
+			statesHook: VueHook,
+			requestAdapter: mockRequestAdapter
+		});
+
+		await expect(() => alovaInst.Post('/detail').send()).rejects.toThrow('new error:network error');
 	});
 });
