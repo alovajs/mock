@@ -140,7 +140,7 @@ export default function MockRequest<RC, RE, RH>(
 						params,
 						headers: requestHeaders,
 						query,
-						data: data || {},
+						data: (data as any) || {},
 						responseHeaders,
 						response: body
 					});
@@ -150,7 +150,7 @@ export default function MockRequest<RC, RE, RH>(
 						headers: requestHeaders,
 						query,
 						params,
-						data: data || {}
+						data: (data as any) || {}
 					},
 					method
 				);
