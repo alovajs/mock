@@ -3,8 +3,8 @@
  * @LastEditors: JOU(wx: huzhen555)
  * @LastEditTime: 2022-11-30 21:15:34
  */
-var typescript = require('rollup-plugin-typescript2');
-var { readFileSync } = require('fs');
+const typescript = require('rollup-plugin-typescript2');
+const { readFileSync } = require('fs');
 
 const getCompiler = (
 	opt = {
@@ -20,7 +20,7 @@ const getCompiler = (
 exports.getCompiler = getCompiler;
 
 const pkg = JSON.parse(readFileSync('package.json').toString() || '{}');
-const version = pkg.version;
+const version = process.env.VERSION || pkg.version;
 const author = pkg.author;
 const homepage = pkg.homepage;
 exports.banner = `/**
@@ -30,10 +30,10 @@ exports.banner = `/**
   */
 `;
 
-const compilePath = exports.compilePath = {
+const compilePath = (exports.compilePath = {
 	external: ['alova'],
 	packageName: 'AlovaMock',
 	input: 'src/index.ts',
 	output: suffix => `dist/alova-mock.${suffix}.js`
-};
+});
 exports.external = compilePath.external;
