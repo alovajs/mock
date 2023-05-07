@@ -1,4 +1,4 @@
-import { createAlova } from 'alova';
+import { createAlova, useRequest } from 'alova';
 import VueHook from 'alova/vue';
 import createAlovaMockAdapter from '../src/createAlovaMockAdapter';
 import defineMock from '../src/defineMock';
@@ -268,5 +268,123 @@ describe('mock request', () => {
 		});
 
 		await expect(() => alovaInst.Post('/detail').send()).rejects.toThrow('new error:network error');
+	});
+
+	test('should abort request when call abort manually', async () => {
+		const mocks = defineMock({
+			'[POST]/detail': async () => {
+				return [];
+			}
+		});
+
+		// 模拟数据请求适配器
+		const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+			delay: 1000
+		});
+
+		const alovaInst = createAlova({
+			baseURL: 'http://xxx',
+			statesHook: VueHook,
+			requestAdapter: mockRequestAdapter
+		});
+
+		const { abort, error } = useRequest(alovaInst.Post('/detail'));
+		expect(error.value).toBeUndefined();
+		await new Promise(resolve => {
+			setTimeout(resolve, 500);
+		});
+		abort();
+		await new Promise(resolve => {
+			setTimeout(resolve, 100);
+		});
+		expect(error.value?.message).toBe('The user abort request');
+	});
+
+	test('should abort request even if delay in mock function', async () => {
+		const mocks = defineMock({
+			'[POST]/detail': async () => {
+				await new Promise(resolve => {
+					setTimeout(resolve, 1000);
+				});
+				return [];
+			}
+		});
+
+		// 模拟数据请求适配器
+		const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+			delay: 10
+		});
+
+		const alovaInst = createAlova({
+			baseURL: 'http://xxx',
+			statesHook: VueHook,
+			requestAdapter: mockRequestAdapter
+		});
+		const { abort, error } = useRequest(alovaInst.Post('/detail'));
+		expect(error.value).toBeUndefined();
+		await new Promise(resolve => {
+			setTimeout(resolve, 500);
+		});
+		abort();
+		await new Promise(resolve => {
+			setTimeout(resolve, 100);
+		});
+		expect(error.value?.message).toBe('The user abort request');
+	});
+
+	test('should timeout when timeout', async () => {
+		const mocks = defineMock({
+			'[POST]/detail': async () => {
+				return [];
+			}
+		});
+
+		// 模拟数据请求适配器
+		const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+			delay: 1000
+		});
+
+		const alovaInst = createAlova({
+			baseURL: 'http://xxx',
+			statesHook: VueHook,
+			timeout: 500,
+			requestAdapter: mockRequestAdapter
+		});
+
+		const { error, onError } = useRequest(alovaInst.Post('/detail'));
+		expect(error.value).toBeUndefined();
+		await new Promise(resolve => {
+			onError(resolve);
+		});
+		expect(error.value?.message).toBe('request timeout');
+	});
+
+	test('should timeout even if delay in mock function', async () => {
+		const mocks = defineMock({
+			'[POST]/detail': async () => {
+				await new Promise(resolve => {
+					setTimeout(resolve, 1000);
+				});
+				return [];
+			}
+		});
+
+		// 模拟数据请求适配器
+		const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+			delay: 10
+		});
+		const alovaInst = createAlova({
+			baseURL: 'http://xxx',
+			statesHook: VueHook,
+			timeout: 500,
+			requestAdapter: mockRequestAdapter
+		});
+
+		const { error, onError } = useRequest(alovaInst.Post('/detail'));
+		expect(error.value).toBeUndefined();
+		await new Promise(resolve => {
+			onError(resolve);
+		});
+		expect(error.value?.message).toBe('request timeout');
 	});
 });
