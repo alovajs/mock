@@ -91,6 +91,12 @@ export default function MockRequest<RC, RE, RH>(
 
 		let timer: NodeJS.Timeout;
 		let rejectFn: (reason?: any) => void = noop;
+		const timeout = method.config.timeout || 0;
+		if (timeout > 0) {
+			setTimeout(() => {
+				rejectFn(new Error('request timeout'));
+			}, timeout);
+		}
 		const resonpsePromise = new Promise<any>((resolve, reject) => {
 			rejectFn = reject;
 			timer = setTimeout(() => {
@@ -104,7 +110,14 @@ export default function MockRequest<RC, RE, RH>(
 								headers: requestHeaders
 						  })
 						: mockDataRaw;
-					resolve(res);
+
+					// 这段代码表示，将内部reject赋值到外部，如果超时了则立即触发reject，或者等待res（如果res为promise）resolve
+					resolve(
+						new Promise<any>((resolveInner, rejectInner) => {
+							rejectFn = rejectInner;
+							Promise.resolve(res).then(resolveInner).catch(rejectInner);
+						})
+					);
 				} catch (error) {
 					reject(error);
 				}
@@ -166,7 +179,7 @@ export default function MockRequest<RC, RE, RH>(
 			headers: () => resonpsePromise.then(({ headers }) => headers),
 			abort: () => {
 				clearTimeout(timer);
-				rejectFn('The user abort request');
+				rejectFn(new Error('The user abort request'));
 			}
 		};
 	};
