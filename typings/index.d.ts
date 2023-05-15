@@ -1,10 +1,10 @@
-import { AlovaRequestAdapter, Method, RequestBody } from 'alova';
+import { AlovaRequestAdapter, Method } from 'alova';
 
 interface MockServerRequest {
 	headers: Record<string, any>;
 	query: Record<string, any>;
 	params: Record<string, any>;
-	data?: RequestBody;
+	data: Record<string, any>;
 }
 
 interface ResponseHeaders {
