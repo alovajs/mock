@@ -3,6 +3,13 @@ import VueHook from 'alova/vue';
 import createAlovaMockAdapter from '../src/createAlovaMockAdapter';
 import defineMock from '../src/defineMock';
 
+export const untilCbCalled = <T>(setCb: (cb: (arg: T) => void, ...others: any[]) => void, ...args: any[]) =>
+	new Promise<T>(resolve => {
+		setCb(d => {
+			resolve(d);
+		}, ...args);
+	});
+
 describe('mock request', () => {
 	test('response with plain body data', async () => {
 		const mockApi = jest.fn();
@@ -270,6 +277,37 @@ describe('mock request', () => {
 		await expect(() => alovaInst.Post('/detail').send()).rejects.toThrow('new error:network error');
 	});
 
+	test("shouldn't throw error when has no being request", async () => {
+		const mocks = defineMock({
+			'[POST]/detail': async () => {
+				return [];
+			}
+		});
+		// 模拟数据请求适配器
+		const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+			onMockResponse: ({ body }) => {
+				return {
+					response: body,
+					headers: {}
+				};
+			}
+		});
+
+		const alovaInst = createAlova({
+			baseURL: 'http://xxx',
+			statesHook: VueHook,
+			requestAdapter: mockRequestAdapter
+		});
+		const { abort, error, onError, onSuccess } = useRequest(alovaInst.Post('/detail'));
+		const mockFn = jest.fn();
+		onError(mockFn);
+		await untilCbCalled(onSuccess);
+		abort();
+		await untilCbCalled(setTimeout, 100);
+		expect(error.value).toBeUndefined();
+		expect(mockFn).not.toBeCalled();
+	});
+
 	test('should abort request when call abort manually', async () => {
 		const mocks = defineMock({
 			'[POST]/detail': async () => {
@@ -290,13 +328,9 @@ describe('mock request', () => {
 
 		const { abort, error } = useRequest(alovaInst.Post('/detail'));
 		expect(error.value).toBeUndefined();
-		await new Promise(resolve => {
-			setTimeout(resolve, 500);
-		});
+		await untilCbCalled(setTimeout, 500);
 		abort();
-		await new Promise(resolve => {
-			setTimeout(resolve, 100);
-		});
+		await untilCbCalled(setTimeout, 100);
 		expect(error.value?.message).toBe('The user abort request');
 	});
 
@@ -322,13 +356,10 @@ describe('mock request', () => {
 		});
 		const { abort, error } = useRequest(alovaInst.Post('/detail'));
 		expect(error.value).toBeUndefined();
-		await new Promise(resolve => {
-			setTimeout(resolve, 500);
-		});
+		expect(error.value).toBeUndefined();
+		await untilCbCalled(setTimeout, 500);
 		abort();
-		await new Promise(resolve => {
-			setTimeout(resolve, 100);
-		});
+		await untilCbCalled(setTimeout, 100);
 		expect(error.value?.message).toBe('The user abort request');
 	});
 
