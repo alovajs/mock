@@ -14,7 +14,8 @@ export default function MockRequest<RC, RE, RH>(
 		mockRequestLogger = consoleRequestInfo,
 		mock,
 		onMockResponse = defaultMockResponse,
-		onMockError = defaultMockError
+		onMockError = defaultMockError,
+		matchMode = 'pathname'
 	}: MockRequestInitWithMock<any, any, RC, RE, RH> = { mock: {} }
 ) {
 	return (elements: RequestElements, method: Method<any, any, any, any, RC, RE, RH>) => {
@@ -22,7 +23,13 @@ export default function MockRequest<RC, RE, RH>(
 		mock = (enable && mock) || {};
 
 		const { url, data, type, headers: requestHeaders } = elements;
-		const { pathname, query } = parseUrl(url);
+		let pathname = method.url,
+			query = method.config.params || {};
+		if (matchMode === 'pathname') {
+			const parsedUrl = parseUrl(url);
+			pathname = parsedUrl.pathname;
+			query = parsedUrl.query;
+		}
 		const params: Record<string, string> = {};
 		const pathnameSplited = pathname.split('/');
 		const foundMockDataKeys = Object.keys(mock).filter(key => {
