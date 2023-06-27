@@ -418,4 +418,34 @@ describe('mock request', () => {
 		});
 		expect(error.value?.message).toBe('request timeout');
 	});
+
+	test('should match method url in `methodurl` mode', async () => {
+		const mocks = defineMock({
+			'[POST]/detail': {
+				id: 1
+			}
+		});
+
+		// 模拟数据请求适配器
+		const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+			delay: 10,
+			matchMode: 'methodurl',
+			onMockResponse({ body }) {
+				return {
+					response: body,
+					headers: {}
+				};
+			}
+		});
+
+		const data = await createAlova({
+			baseURL: 'http://xxx/v1/v2',
+			statesHook: VueHook,
+			timeout: 500,
+			requestAdapter: mockRequestAdapter
+		})
+			.Post('/detail')
+			.send();
+		expect(data).toStrictEqual({ id: 1 });
+	});
 });
