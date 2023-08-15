@@ -6,3 +6,5 @@ console.warn = (...args: any[]) => {
 		warn.apply(console, args);
 	}
 };
+
+(global as any).isSSR = typeof window === 'undefined';

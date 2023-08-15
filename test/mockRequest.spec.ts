@@ -277,7 +277,7 @@ describe('mock request', () => {
 		await expect(() => alovaInst.Post('/detail').send()).rejects.toThrow('new error:network error');
 	});
 
-	test("shouldn't throw error when has no being request", async () => {
+	(isSSR ? xtest : test)("shouldn't throw error when has no being request", async () => {
 		const mocks = defineMock({
 			'[POST]/detail': async () => {
 				return [];
@@ -308,7 +308,7 @@ describe('mock request', () => {
 		expect(mockFn).not.toBeCalled();
 	});
 
-	test('should abort request when call abort manually', async () => {
+	(isSSR ? xtest : test)('should abort request when call abort manually', async () => {
 		const mocks = defineMock({
 			'[POST]/detail': async () => {
 				return [];
@@ -334,7 +334,7 @@ describe('mock request', () => {
 		expect(error.value?.message).toBe('The user abort request');
 	});
 
-	test('should abort request even if delay in mock function', async () => {
+	(isSSR ? xtest : test)('should abort request even if delay in mock function', async () => {
 		const mocks = defineMock({
 			'[POST]/detail': async () => {
 				await new Promise(resolve => {
@@ -363,7 +363,7 @@ describe('mock request', () => {
 		expect(error.value?.message).toBe('The user abort request');
 	});
 
-	test('should timeout when timeout', async () => {
+	(isSSR ? xtest : test)('should timeout when timeout', async () => {
 		const mocks = defineMock({
 			'[POST]/detail': async () => {
 				return [];
@@ -390,7 +390,7 @@ describe('mock request', () => {
 		expect(error.value?.message).toBe('request timeout');
 	});
 
-	test('should timeout even if delay in mock function', async () => {
+	(isSSR ? xtest : test)('should timeout even if delay in mock function', async () => {
 		const mocks = defineMock({
 			'[POST]/detail': async () => {
 				await new Promise(resolve => {
