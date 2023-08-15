@@ -54,7 +54,7 @@
 		"@types/jest": "^29.4.0",
 		"@typescript-eslint/eslint-plugin": "^5.54.0",
 		"@typescript-eslint/parser": "^5.54.0",
-		"alova": "^2.2.0",
+		"alova": "^2.10.1",
 		"babel-jest": "^29.5.0",
 		"commitizen": "^4.3.0",
 		"commitlint": "^17.5.1",

@@ -12,7 +12,7 @@ const labelStyle = (bgColor: string, borderColor = '') => {
 	}
 	return style;
 };
-const titleStyle = () => 'color: black; font-size: 12px; font-weight: bolder';
+const titleStyle = 'color: black; font-size: 12px; font-weight: bolder';
 const transform2TableData = (obj: AnyObject) => {
 	const tableData = {} as AnyObject;
 	for (const key in obj) {
@@ -33,36 +33,37 @@ const consoleRequestInfo: MockRequestLoggerAdapter = ({
 	responseHeaders,
 	response
 }) => {
-	console.groupCollapsed(
+	const cole = console;
+	cole.groupCollapsed(
 		`%c${isMock ? mockLabel : realRequestLabel}`,
 		labelStyle(isMock ? mockLabelColor : realRequestLabelColor),
 		url
 	);
 
 	// 请求方法
-	console.log('%c[Method]', titleStyle(), method.toUpperCase());
+	cole.log('%c[Method]', titleStyle, method.toUpperCase());
 
 	// 输出Request Headers
-	console.log('%c[Request Headers]', titleStyle());
-	console.table(transform2TableData(headers));
+	cole.log('%c[Request Headers]', titleStyle);
+	cole.table(transform2TableData(headers));
 
 	// 输出Query String Parameters
-	console.log('%c[Query String Parameters]', titleStyle());
-	console.table(transform2TableData(query));
+	cole.log('%c[Query String Parameters]', titleStyle);
+	cole.table(transform2TableData(query));
 
 	// 输出request body
-	console.log('%c[Request Body]', titleStyle(), data || '');
+	cole.log('%c[Request Body]', titleStyle, data || '');
 
 	// 输出response body
 	if (isMock) {
 		// 响应头有数据时，输出Response Headers
 		if (Object.keys(responseHeaders).length > 0) {
-			console.log('%c[Response Headers]', titleStyle());
-			console.table(transform2TableData(responseHeaders));
+			cole.log('%c[Response Headers]', titleStyle);
+			cole.table(transform2TableData(responseHeaders));
 		}
-		console.log('%c[Response Body]', titleStyle(), response || '');
+		cole.log('%c[Response Body]', titleStyle, response || '');
 	}
-	console.groupEnd();
+	cole.groupEnd();
 };
 
 export default consoleRequestInfo;
