@@ -113,7 +113,7 @@ export default function MockRequest<RC, RE, RH>(
 						? mockDataRaw({
 								query,
 								params,
-								data,
+								data: isString(data) || !data ? {} : data,
 								headers: requestHeaders
 						  })
 						: mockDataRaw;
