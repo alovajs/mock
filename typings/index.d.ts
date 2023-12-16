@@ -1,4 +1,5 @@
 import { AlovaRequestAdapter, Method } from 'alova';
+import { FetchRequestInit } from 'alova/GlobalFetch';
 
 interface MockServerRequest {
 	headers: Record<string, any>;
@@ -23,7 +24,7 @@ interface MockRequestLoggerAdapter {
 /**
  * 模拟响应函数
  */
-interface MockResponse<RC = any, RE = any, RH = any> {
+interface MockResponse<RC, RE, RH> {
 	(
 		response: {
 			status: number;
@@ -87,9 +88,9 @@ interface MockWrapper {
 	data: Mock;
 }
 
-export declare function createAlovaMockAdapter<R = any, T = any, RC = any, RE = any, RH = any>(
+export declare function createAlovaMockAdapter<RC = FetchRequestInit, RE = Response, RH = Headers>(
 	mockWrapper: MockWrapper[],
-	options?: MockRequestInit<R, T, RC, RE, RH>
-): AlovaRequestAdapter<R, T, RC, RE, RH>;
+	options?: MockRequestInit<any, any, RC, RE, RH>
+): AlovaRequestAdapter<any, any, RC, RE, RH>;
 
 export declare function defineMock(mock: Mock, enable?: boolean): MockWrapper;
