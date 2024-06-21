@@ -10,5 +10,5 @@
 		"source.organizeImports": "explicit",
 		"source.fixAll.eslint": "explicit"
 	},
-	"jest.autoRun": "off"
+	"jest.runMode": "deferred"
 }
