@@ -34,6 +34,6 @@ const compilePath = (exports.compilePath = {
 	external: ['alova'],
 	packageName: 'AlovaMock',
 	input: 'src/index.ts',
-	output: suffix => `dist/alova-mock.${suffix}.js`
+	output: suffix => `dist/alova-mock.${suffix}.${suffix === 'cjs' ? 'cjs' : 'js'}`
 });
 exports.external = compilePath.external;

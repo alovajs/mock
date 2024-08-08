@@ -18,9 +18,10 @@
 		"lint": "eslint --ext .ts,.js src/**",
 		"lint:fix": "eslint --ext .ts,.js src/** --fix",
 		"build:esm": "cross-env NODE_ENV=development rollup -c ./config/rollup.config.esm.cjs",
+		"build:cjs": "cross-env NODE_ENV=development rollup -c ./config/rollup.config.cjs",
 		"build:umd": "cross-env NODE_ENV=development rollup -c ./config/rollup.config.umd.cjs",
 		"build:umd.min": "cross-env NODE_ENV=production rollup -c ./config/rollup.config.umd.cjs",
-		"build": "npm run clean && npm run build:esm && npm run build:umd && npm run build:umd.min",
+		"build": "npm run clean && npm run build:esm && npm run build:cjs && npm run build:umd && npm run build:umd.min",
 		"release": "semantic-release",
 		"coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
 		"commit": "git add . && git-cz && git push"
